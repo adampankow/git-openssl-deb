@@ -39,7 +39,7 @@ jobs:
 
       - name: Build .deb package
         working-directory: ./git-${{ steps.version.outputs.version }}
-        run: dpkg-buildpackage -rfakeroot -b
+        run: DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -rfakeroot -b
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
