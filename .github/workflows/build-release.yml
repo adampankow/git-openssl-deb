@@ -41,7 +41,9 @@ jobs:
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ../*.deb
+          files: |
+            git_*.deb
+            git-dbgsym_*.ddeb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
