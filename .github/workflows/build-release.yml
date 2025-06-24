@@ -2,33 +2,37 @@ name: Build and Release Git with OpenSSL
 
 on:
   push:
-    tags:
-      - 'v*'  # Triggers on tags like v1.0.0
+    tags: ['v*']
 
 jobs:
   build-and-release:
     runs-on: ubuntu-24.04
     steps:
-      - name: Extract Git version from tag
+      - name: Extract Git version
         id: version
-        run: |
-          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Install build dependencies
+      - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y build-essential fakeroot dpkg-dev \
-          libcurl4-openssl-dev libssl-dev libexpat1-dev gettext cmake
+          libcurl4-openssl-dev libssl-dev libexpat1-dev gettext \
+          dh-make devscripts
 
       - name: Download Git source
         run: |
           wget https://mirrors.edge.kernel.org/pub/software/scm/git/git-${{ steps.version.outputs.version }}.tar.gz
           tar -zxvf git-${{ steps.version.outputs.version }}.tar.gz
 
-      - name: Patch for OpenSSL
+      - name: Initialize Debian packaging
+        working-directory: ./git-${{ steps.version.outputs.version }}
+        run: dh_make --createorig -s -y -p git_${{ steps.version.outputs.version }}
+
+      - name: Patch control for OpenSSL
         working-directory: ./git-${{ steps.version.outputs.version }}
         run: |
           sed -i 's/libcurl4-gnutls-dev/libcurl4-openssl-dev/' debian/control
+          sed -i 's/^Build-Depends: /&libcurl4-openssl-dev, /' debian/control
 
       - name: Build .deb package
         working-directory: ./git-${{ steps.version.outputs.version }}
@@ -37,7 +41,7 @@ jobs:
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ../*.deb  # Attaches all built .deb files
+          files: ../*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
