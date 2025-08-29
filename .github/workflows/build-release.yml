@@ -45,7 +45,6 @@ jobs:
         run: DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -rfakeroot -b
 
       - name: Rename packages to include OS version
-        working-directory: ..
         run: |
           for f in git_*.deb git-dbgsym_*.ddeb; do
             ext="${f##*.}"
