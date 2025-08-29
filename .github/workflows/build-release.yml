@@ -46,7 +46,17 @@ jobs:
 
       - name: Rename packages to include OS version
         run: |
-          for f in git_*.deb git-dbgsym_*.ddeb; do
+          # Rename .deb files in parent directory
+          for f in ../git_*.deb; do
+            [ -e "$f" ] || continue
+            ext="${f##*.}"
+            base="${f%.*}"
+            mv "$f" "${base}-${{ matrix.os }}.${ext}"
+          done
+
+          # Rename .ddeb files in build directory
+          for f in ./git-${{ steps.version.outputs.version }}/git-dbgsym_*.ddeb; do
+            [ -e "$f" ] || continue
             ext="${f##*.}"
             base="${f%.*}"
             mv "$f" "${base}-${{ matrix.os }}.${ext}"
