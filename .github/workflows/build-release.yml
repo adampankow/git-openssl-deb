@@ -46,7 +46,7 @@ jobs:
 
       - name: Rename packages to include OS version
         run: |
-          for f in ../git_*.deb ../git-dbgsym_*.ddeb; do
+          for f in git_*.deb git-dbgsym_*.ddeb; do
             mv "$f" "${f%.deb}-${{ matrix.os }}.deb"
           done
 
